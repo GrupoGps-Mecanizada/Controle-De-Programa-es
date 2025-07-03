@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle De Equipamentos e Programações - GrupoGps</title>
+
+    <!-- libs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Header Sofisticado */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-brand h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: #5a6c7d;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .last-update-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .sync-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-dot.success { background: #27ae60; }
+        .sync-dot.error { background: #e74c3c; }
+        .sync-dot.loading { background: #f39c12; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .panel-content {
+            padding: 1.5rem;
+        }
+
+        /* Compact Stats */
+        .compact-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .compact-stat-card {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .compact-stat-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .compact-stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .compact-stat-label {
+            font-size: 0.8rem;
+            color: #5a6c7d;
+            margin-top: 0.25rem;
+            font-weight: 600;
+        }
+
+        /* Controls */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .btn.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        input[type="text"] {
+            padding: 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            color: #2c3e50;
+            width: 300px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Equipment Table */
+        .equipment-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f8f9fa;
+            font-size: 0.85rem;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-ativo {
+            background: rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+        }
+
+        .status-parado {
+            background: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        .status-manutencao {
+            background: rgba(245, 158, 11, 0.2);
+            color: #d97706;
+        }
+
+        /* Loading States */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #5a6c7d;
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            text-align: center;
+            color: #5a6c7d;
+            font-size: 0.9rem;
+        }
+
+        .footer strong {
+            color: #2c3e50;
+        }
+
+        /* Notificações */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 10000;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+        }
+
+        .notification.success { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .notification.error { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .notification.warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .notification.info { background: linear-gradient(135deg, #3498db, #2980b9); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-brand h1 {
+                font-size: 1.5rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-group {
+                justify-content: center;
+            }
+
+            input[type="text"] {
+                width: 100%;
+            }
+
+            .compact-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 8px 6px;
+            }
+        }
+
+        /* Hidden utilities */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-brand">
+                    <h1>🚛 Controle De Equipamentos e Programações - GrupoGps</h1>
+                </div>
+                
+                <div class="header-controls">
+                    <div class="sync-indicator">
+                        <div class="sync-dot loading" id="syncDot"></div>
+                        <span id="syncStatus">Carregando dados...</span>
+                    </div>
+                    
+                    <div class="last-update-info">
+                        <span style="font-size: 0.85rem; color: #5a6c7d;">Última atualização:</span>
+                        <span id="lastUpdateTime" style="font-weight: 600; color: #2c3e50;">--:--</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Estatísticas Compactas -->
+            <div class="compact-stats" id="compactStats">
+                <div class="compact-stat-card">
+                    <div class="compact-stat-value" id="totalEquipamentos">0</div>
+                    <div class="compact-stat-label">Equipamentos</div>
+                </div>
+                <div class="compact-stat-card">
+                    <div class="compact-stat-value" id="totalProgramacoes">0</div>
+                    <div class="compact-stat-label">Programações</div>
+                </div>
+                <div class="compact-stat-card">
+                    <div class="compact-stat-value" id="equipamentosAtivos">0</div>
+                    <div class="compact-stat-label">Ativos</div>
+                </div>
+                <div class="compact-stat-card">
+                    <div class="compact-stat-value" id="dataAtual">--</div>
+                    <div class="compact-stat-label">Data Atual</div>
+                </div>
+            </div>
+
+            <!-- Painel Principal -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span>📋</span>
+                        Equipamentos e Programações Consolidadas
+                    </div>
+                    <div id="totalRegistros" style="font-size: 0.9rem; color: #5a6c7d;">
+                        0 registros
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <!-- Controles -->
+                    <div class="controls-row">
+                        <div class="search-group">
+                            <input type="text" id="searchInput" placeholder="Buscar por vaga, equipamento ou motorista..." />
+                            <button class="btn" onclick="filtrarTabela()">
+                                <span>🔍</span>
+                                Buscar
+                            </button>
+                        </div>
+                        
+                        <div class="search-group">
+                            <button class="btn success" onclick="exportarDados('xlsx')">
+                                <span>📊</span>
+                                Exportar Excel
+                            </button>
+                            <button class="btn warning" onclick="exportarDados('csv')">
+                                <span>📋</span>
+                                Exportar CSV
+                            </button>
+                            <button class="btn" onclick="atualizarDados()">
+                                <span>🔄</span>
+                                Atualizar
+                            </button>
+                            <button class="btn secondary" onclick="testarConectividade()" style="background: linear-gradient(135deg, #95a5a6, #7f8c8d);">
+                                <span>🔍</span>
+                                Debug
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Dados -->
+                    <div class="equipment-table" id="dataTable">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <div>Carregando dados do GitHub...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Desenvolvido por <strong>Warlison Abreu</strong> | © 2025 GrupoGPS - Todos os direitos reservados</p>
+        </footer>
+    </div>
+
+    <script>
+        /*********************************
+         * CONFIGURAÇÕES GITHUB          *
+         *********************************/
+        const GITHUB_CONFIG = {
+            TOKEN: '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',
+            OWNER: 'GrupoGps-Mecanizada',
+            REPO: 'Controle-De-Programa-es',
+            BRANCH: 'main',
+            FILES: {
+                APROPRIACOES: 'data/apropriacoes/apropriacao-latest.csv',
+                ATENDIMENTOS: 'data/atendimentos/atendimento-latest.csv',
+                CHECKLIST: 'data/checklist-dados.csv'
+            }
+        };
+
+        /*********************************
+         * ESTADO GLOBAL                 *
+         *********************************/
+        let dadosConsolidados = [];
+        let dadosFiltrados = [];
+        let lastSyncTime = null;
+        
+        /*********************************
+         * FUNÇÕES DE ACESSO AO GITHUB   *
+         *********************************/
+        async function fetchGitHubFile(filePath) {
+            console.log(`🔄 Tentando carregar: ${filePath}`);
+            
+            // Método 1: API do GitHub
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/contents/${filePath}`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = atob(data.content.replace(/\s/g, ''));
+                    console.log(`✅ Arquivo carregado via API: ${filePath}`);
+                    return content;
+                }
+                
+                console.warn(`⚠️ API falhou para ${filePath} (${response.status}), tentando raw...`);
+            } catch (error) {
+                console.warn(`⚠️ Erro na API para ${filePath}:`, error.message);
+            }
+            
+            // Método 2: Raw GitHub (fallback)
+            try {
+                const rawUrl = `https://raw.githubusercontent.com/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/${GITHUB_CONFIG.BRANCH}/${filePath}`;
+                
+                const response = await fetch(rawUrl + '?v=' + Date.now()); // Cache busting
+                
+                if (response.ok) {
+                    const content = await response.text();
+                    console.log(`✅ Arquivo carregado via RAW: ${filePath}`);
+                    return content;
+                }
+                
+                console.error(`❌ Raw também falhou para ${filePath} (${response.status})`);
+            } catch (error) {
+                console.error(`❌ Erro no raw para ${filePath}:`, error.message);
+            }
+            
+            throw new Error(`Falha ao carregar ${filePath} por ambos os métodos`);
+        }
+
+        async function listarArquivosPasta(folderPath) {
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/contents/${folderPath}`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.warn(`⚠️ Pasta não encontrada: ${folderPath} (${response.status})`);
+                    return [];
+                }
+                
+                const data = await response.json();
+                
+                // Se for um arquivo único, não um array
+                if (!Array.isArray(data)) {
+                    if (data.type === 'file' && data.name.endsWith('.csv')) {
+                        console.log(`📄 Arquivo CSV encontrado: ${data.name}`);
+                        return [folderPath];
+                    }
+                    return [];
+                }
+                
+                const arquivos = data.filter(item => item.type === 'file' && item.name.endsWith('.csv'));
+                const caminhos = arquivos.map(f => `${folderPath}/${f.name}`);
+                
+                console.log(`📁 Arquivos CSV na pasta ${folderPath}:`, arquivos.map(f => f.name));
+                return caminhos;
+            } catch (error) {
+                console.error(`❌ Erro ao listar pasta ${folderPath}:`, error);
+                return [];
+            }
+        }
+
+        async function carregarTodosOsArquivos() {
+            try {
+                updateSyncStatus('loading', 'Carregando arquivos do GitHub...');
+                console.log('🔄 Iniciando carregamento dos arquivos...');
+                
+                // Carregar arquivos usando os caminhos corretos da estrutura
+                console.log('📂 Carregando arquivos da estrutura correta...');
+                
+                const [apropriacoesContent, atendimentosContent, checklistContent] = await Promise.all([
+                    fetchGitHubFile(GITHUB_CONFIG.FILES.APROPRIACOES),
+                    fetchGitHubFile(GITHUB_CONFIG.FILES.ATENDIMENTOS),
+                    fetchGitHubFile(GITHUB_CONFIG.FILES.CHECKLIST)
+                ]);
+                
+                console.log('📦 Todos os arquivos carregados, iniciando processamento...');
+                
+                // Processar os dados
+                const dadosApropriacoes = parseCSVContent(apropriacoesContent);
+                const dadosAtendimentos = parseCSVContent(atendimentosContent);
+                const dadosChecklist = parseCSVContent(checklistContent);
+                
+                console.log(`📊 Dados processados:
+                - Apropriações: ${dadosApropriacoes.length} registros
+                - Atendimentos: ${dadosAtendimentos.length} registros  
+                - Checklist: ${dadosChecklist.length} registros`);
+                
+                if (dadosApropriacoes.length === 0) {
+                    throw new Error('Arquivo de apropriações está vazio ou com formato inválido');
+                }
+                
+                if (dadosAtendimentos.length === 0) {
+                    throw new Error('Arquivo de atendimentos está vazio ou com formato inválido');
+                }
+                
+                if (dadosChecklist.length === 0) {
+                    throw new Error('Arquivo de checklist está vazio ou com formato inválido');
+                }
+                
+                // Consolidar os dados
+                dadosConsolidados = consolidarDados(dadosApropriacoes, dadosAtendimentos, dadosChecklist);
+                
+                lastSyncTime = new Date();
+                updateSyncStatus('success', `${dadosConsolidados.length} registros consolidados`);
+                updateLastSyncTime();
+                
+                atualizarInterface();
+                
+                showNotification(`Dados carregados com sucesso! ${dadosConsolidados.length} registros consolidados.`, 'success');
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                updateSyncStatus('error', 'Erro: ' + error.message);
+                showNotification('Erro ao carregar dados: ' + error.message, 'error');
+                
+                // Mostrar informações de debug apenas em caso de erro
+                console.log('🔍 Executando debug para diagnosticar o problema...');
+                await debugRepositoryStructure();
+            }
+        }
+
+        async function debugRepositoryStructure() {
+            try {
+                console.log('🔍 === DEBUG: ESTRUTURA DO REPOSITÓRIO ===');
+                
+                // Listar pasta raiz data/
+                console.log('📂 Verificando estrutura esperada vs real...');
+                
+                console.log('🎯 Arquivos que o sistema está tentando acessar:');
+                console.log(`  - ${GITHUB_CONFIG.FILES.APROPRIACOES}`);
+                console.log(`  - ${GITHUB_CONFIG.FILES.ATENDIMENTOS}`);
+                console.log(`  - ${GITHUB_CONFIG.FILES.CHECKLIST}`);
+                
+                // Verificar cada arquivo individualmente
+                console.log('🔍 Verificando cada arquivo...');
+                
+                for (const [nome, caminho] of Object.entries(GITHUB_CONFIG.FILES)) {
+                    console.log(`\n📋 Testando ${nome}: ${caminho}`);
+                    
+                    // Teste API
+                    try {
+                        const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/contents/${caminho}`;
+                        const apiResponse = await fetch(apiUrl, {
+                            headers: {
+                                'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        });
+                        console.log(`  API: ${apiResponse.ok ? '✅' : '❌'} (${apiResponse.status})`);
+                    } catch (e) {
+                        console.log(`  API: ❌ Erro - ${e.message}`);
+                    }
+                    
+                    // Teste RAW
+                    try {
+                        const rawUrl = `https://raw.githubusercontent.com/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/${GITHUB_CONFIG.BRANCH}/${caminho}`;
+                        const rawResponse = await fetch(rawUrl);
+                        console.log(`  RAW: ${rawResponse.ok ? '✅' : '❌'} (${rawResponse.status})`);
+                        
+                        if (rawResponse.ok) {
+                            const content = await rawResponse.text();
+                            console.log(`  Tamanho: ${content.length} caracteres`);
+                        }
+                    } catch (e) {
+                        console.log(`  RAW: ❌ Erro - ${e.message}`);
+                    }
+                }
+                
+                // Listar o que realmente existe na pasta data/
+                console.log('\n📂 Conteúdo real da pasta data/:');
+                try {
+                    const dataResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/contents/data`, {
+                        headers: {
+                            'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    
+                    if (dataResponse.ok) {
+                        const dataContents = await dataResponse.json();
+                        dataContents.forEach(item => {
+                            console.log(`  ${item.type === 'dir' ? '📁' : '📄'} ${item.name}`);
+                        });
+                    } else {
+                        console.log('❌ Não foi possível listar pasta data/');
+                    }
+                } catch (error) {
+                    console.log('❌ Erro ao listar pasta data/:', error.message);
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro no debug da estrutura:', error);
+            }
+        }
+
+        /*********************************
+         * FUNÇÕES DE PROCESSAMENTO      *
+         *********************************/
+        function parseCSVContent(csvString) {
+            try {
+                console.log('🔄 Iniciando parse do CSV...');
+                console.log('📄 Tamanho do conteúdo:', csvString.length, 'caracteres');
+                console.log('📄 Primeiros 200 caracteres:', csvString.substring(0, 200));
+                
+                const delimiter = csvString.includes(',') && !csvString.includes(';') ? ',' : ';';
+                console.log('🔍 Delimitador detectado:', delimiter);
+                
+                const result = Papa.parse(csvString, {
+                    header: true,
+                    skipEmptyLines: true,
+                    delimiter: delimiter,
+                    transformHeader: header => header.trim().replace(/^"|"$/g, ''),
+                    transform: (value) => {
+                        return typeof value === 'string' ? value.trim().replace(/^"|"$/g, '') : value;
+                    }
+                });
+                
+                console.log('📊 Headers detectados:', result.meta.fields);
+                
+                if (result.errors.length > 0) {
+                    console.warn('⚠️ Erros no parse:', result.errors);
+                }
+                
+                const validData = result.data.filter(linha => Object.values(linha).some(val => val && val.toString().trim() !== ''));
+                
+                console.log('✅ Parse concluído:', validData.length, 'registros válidos');
+                return validData;
+            } catch (error) {
+                console.error('❌ Erro ao parsear CSV:', error);
+                return [];
+            }
+        }
+
+        function consolidarDados(apropriacoes, atendimentos, checklist) {
+            console.log('🔄 Iniciando consolidação dos dados...');
+            
+            const hoje = new Date();
+            const diaAtual = hoje.getDate().toString().padStart(2, '0');
+            const mesAtual = (hoje.getMonth() + 1).toString().padStart(2, '0');
+            const anoAtual = hoje.getFullYear().toString();
+            const dataAtual = `${diaAtual}/${mesAtual}/${anoAtual}`;
+            
+            console.log(`📅 Filtrando dados para o dia: ${dataAtual}`);
+            
+            // Criar mapeamento de equipamentos para motoristas
+            const equipamentoParaMotorista = {};
+            let motoristasMapeados = 0;
+            
+            checklist.forEach(item => {
+                if (item.Placa && item.Motorista && item.Placa !== '--' && item.Placa.trim() !== '') {
+                    equipamentoParaMotorista[item.Placa.trim()] = item.Motorista.trim();
+                    motoristasMapeados++;
+                }
+            });
+            
+            console.log(`👨‍💼 Motoristas mapeados: ${motoristasMapeados}`);
+            console.log('🔗 Mapeamento equipamento-motorista:', equipamentoParaMotorista);
+            
+            // Filtrar apropriações apenas do dia atual e excluir equipamentos "--"
+            const apropriacoesFiltradas = apropriacoes.filter(item => {
+                // Excluir equipamentos "--" ou vazios
+                if (!item.Equipamento || item.Equipamento === '--' || item.Equipamento.trim() === '') {
+                    return false;
+                }
+                
+                // Filtrar apenas do dia atual
+                if (item['Data/Hora inicial']) {
+                    const dataInicial = item['Data/Hora inicial'].split(' ')[0];
+                    return dataInicial === dataAtual;
+                }
+                
+                return false;
+            });
+            
+            console.log(`✅ Apropriações filtradas: ${apropriacoesFiltradas.length} registros do dia ${dataAtual} (de ${apropriacoes.length} total)`);
+            
+            if (apropriacoesFiltradas.length === 0) {
+                console.warn('⚠️ Nenhuma apropriação encontrada para o dia atual. Verificando datas disponíveis...');
+                
+                // Mostrar todas as datas disponíveis para debug
+                const datasDisponiveis = new Set();
+                apropriacoes.forEach(item => {
+                    if (item['Data/Hora inicial']) {
+                        const data = item['Data/Hora inicial'].split(' ')[0];
+                        datasDisponiveis.add(data);
+                    }
+                });
+                
+                console.log('📅 Datas disponíveis no arquivo de apropriações:', Array.from(datasDisponiveis).sort());
+            }
+            
+            // Consolidar dados
+            const dadosConsolidados = [];
+            let atendimentosEncontrados = 0;
+            let motoristasEncontrados = 0;
+            
+            apropriacoesFiltradas.forEach(apropriacao => {
+                const vaga = apropriacao.Vaga;
+                const equipamento = apropriacao.Equipamento.trim();
+                
+                // Buscar atendimento relacionado pela vaga
+                const atendimento = atendimentos.find(item => item.Vaga && item.Vaga.trim() === vaga.trim());
+                if (atendimento) atendimentosEncontrados++;
+                
+                // Buscar motorista pelo equipamento
+                const motorista = equipamentoParaMotorista[equipamento] || 'Não identificado';
+                if (motorista !== 'Não identificado') motoristasEncontrados++;
+                
+                // Status baseado na data final
+                let status = 'ATIVO';
+                if (apropriacao['Data/Hora final'] === 'Apropriado agora') {
+                    status = 'ATIVO';
+                } else if (apropriacao['Data/Hora final']) {
+                    status = 'PARADO';
+                }
+                
+                const registro = {
+                    vaga: vaga || 'N/D',
+                    equipamento: equipamento,
+                    motorista: motorista,
+                    programacao: atendimento ? atendimento['Data/Hora'] : 'Programação não encontrada',
+                    area: atendimento ? atendimento['Área(local)'] : 'Área não encontrada',
+                    dataHoraInicial: apropriacao['Data/Hora inicial'],
+                    dataHoraFinal: apropriacao['Data/Hora final'],
+                    status: status
+                };
+                
+                dadosConsolidados.push(registro);
+            });
+            
+            console.log(`📊 Estatísticas da consolidação:
+            - Registros consolidados: ${dadosConsolidados.length}
+            - Atendimentos encontrados: ${atendimentosEncontrados}/${dadosConsolidados.length}
+            - Motoristas identificados: ${motoristasEncontrados}/${dadosConsolidados.length}
+            - Taxa de sucesso: ${((atendimentosEncontrados + motoristasEncontrados) / (dadosConsolidados.length * 2) * 100).toFixed(1)}%`);
+            
+            return dadosConsolidados;
+        }
+
+        /*********************************
+         * FUNÇÕES DE INTERFACE          *
+         *********************************/
+        function atualizarInterface() {
+            atualizarEstatisticas();
+            exibirTabela();
+        }
+
+        function atualizarEstatisticas() {
+            const totalEquipamentos = new Set(dadosConsolidados.map(item => item.equipamento)).size;
+            const totalProgramacoes = dadosConsolidados.length;
+            const equipamentosAtivos = dadosConsolidados.filter(item => item.status === 'ATIVO').length;
+            const dataAtual = new Date().toLocaleDateString('pt-BR');
+            
+            document.getElementById('totalEquipamentos').textContent = totalEquipamentos;
+            document.getElementById('totalProgramacoes').textContent = totalProgramacoes;
+            document.getElementById('equipamentosAtivos').textContent = equipamentosAtivos;
+            document.getElementById('dataAtual').textContent = dataAtual.substring(0, 5); // DD/MM
+            document.getElementById('totalRegistros').textContent = `${dadosConsolidados.length} registros`;
+        }
+
+        function exibirTabela() {
+            const container = document.getElementById('dataTable');
+            const dados = dadosFiltrados.length > 0 ? dadosFiltrados : dadosConsolidados;
+            
+            if (!dados.length) {
+                container.innerHTML = '<div class="loading-state"><div>Nenhum dado encontrado</div></div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vaga</th>
+                            <th>Equipamento</th>
+                            <th>Motorista</th>
+                            <th>Programação</th>
+                            <th>Área</th>
+                            <th>Data/Hora Inicial</th>
+                            <th>Data/Hora Final</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            dados.forEach(registro => {
+                const statusClass = registro.status.toLowerCase();
+                tableHTML += `
+                    <tr>
+                        <td>${registro.vaga}</td>
+                        <td><strong>${registro.equipamento}</strong></td>
+                        <td>${registro.motorista}</td>
+                        <td>${registro.programacao}</td>
+                        <td>${registro.area}</td>
+                        <td>${registro.dataHoraInicial}</td>
+                        <td>${registro.dataHoraFinal}</td>
+                        <td><span class="status-badge status-${statusClass}">${registro.status}</span></td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+        }
+
+        function filtrarTabela() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                dadosFiltrados = [];
+                exibirTabela();
+                return;
+            }
+            
+            dadosFiltrados = dadosConsolidados.filter(registro => {
+                return (
+                    registro.vaga.toLowerCase().includes(searchTerm) ||
+                    registro.equipamento.toLowerCase().includes(searchTerm) ||
+                    registro.motorista.toLowerCase().includes(searchTerm) ||
+                    registro.area.toLowerCase().includes(searchTerm)
+                );
+            });
+            
+            exibirTabela();
+            
+            if (dadosFiltrados.length === 0) {
+                showNotification('Nenhum resultado encontrado para a busca.', 'warning');
+            } else {
+                showNotification(`${dadosFiltrados.length} registros encontrados.`, 'success');
+            }
+        }
+
+        function exportarDados(formato) {
+            const dados = dadosFiltrados.length > 0 ? dadosFiltrados : dadosConsolidados;
+            
+            if (!dados.length) {
+                showNotification('Nenhum dado para exportar.', 'warning');
+                return;
+            }
+            
+            const dadosParaExportar = dados.map(registro => ({
+                'Vaga': registro.vaga,
+                'Equipamento': registro.equipamento,
+                'Motorista': registro.motorista,
+                'Programação': registro.programacao,
+                'Área': registro.area,
+                'Data/Hora Inicial': registro.dataHoraInicial,
+                'Data/Hora Final': registro.dataHoraFinal,
+                'Status': registro.status
+            }));
+            
+            const nomeArquivo = `Controle_Equipamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '_')}`;
+            
+            if (formato === 'xlsx') {
+                const ws = XLSX.utils.json_to_sheet(dadosParaExportar);
+                ws['!cols'] = Array(8).fill({ width: 20 });
+                
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Equipamentos');
+                XLSX.writeFile(wb, `${nomeArquivo}.xlsx`);
+            } else {
+                const csv = Papa.unparse(dadosParaExportar, { delimiter: ';', header: true });
+                const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${nomeArquivo}.csv`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }
+            
+            showNotification(`Arquivo ${formato.toUpperCase()} exportado com sucesso!`, 'success');
+        }
+
+        function atualizarDados() {
+            carregarTodosOsArquivos();
+        }
+
+        /*********************************
+         * FUNÇÕES AUXILIARES            *
+         *********************************/
+        function updateSyncStatus(status, message) {
+            const dot = document.getElementById('syncDot');
+            const statusText = document.getElementById('syncStatus');
+            
+            dot.className = 'sync-dot';
+            dot.classList.add(status);
+            statusText.textContent = message;
+        }
+
+        function updateLastSyncTime() {
+            const lastUpdateTimeElement = document.getElementById('lastUpdateTime');
+            if (lastUpdateTimeElement) {
+                lastUpdateTimeElement.textContent = new Date().toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filtrarTabela();
+            }
+        });
+
+        // Limpar filtro quando campo de busca estiver vazio
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            if (e.target.value === '') {
+                dadosFiltrados = [];
+                exibirTabela();
+            }
+        });
+
+        /*********************************
+         * INICIALIZAÇÃO                 *
+         *********************************/
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚛 Iniciando Controle de Equipamentos e Programações - GrupoGPS');
+            
+            updateSyncStatus('loading', 'Inicializando sistema...');
+            updateLastSyncTime();
+            
+            // Testar conectividade primeiro
+            setTimeout(async () => {
+                await testarConectividade();
+                carregarTodosOsArquivos();
+            }, 1000);
+            
+            // Auto-atualização a cada 5 minutos
+            setInterval(() => {
+                console.log('🔄 Auto-atualização executando...');
+                carregarTodosOsArquivos();
+            }, 5 * 60 * 1000); // 5 minutos
+            
+            console.log('✅ Sistema inicializado com sucesso!');
+        });
+
+        async function testarConectividade() {
+            try {
+                console.log('🌐 Testando conectividade com GitHub...');
+                
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const repoInfo = await response.json();
+                    console.log(`✅ Conectado ao repositório: ${repoInfo.full_name}`);
+                    console.log(`📅 Última atualização: ${new Date(repoInfo.updated_at).toLocaleString('pt-BR')}`);
+                    
+                    // Listar estrutura da pasta data
+                    console.log('📂 Descobrindo estrutura do repositório...');
+                    await debugRepositoryStructure();
+                } else {
+                    throw new Error(`Falha na autenticação: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('❌ Erro de conectividade:', error);
+                updateSyncStatus('error', 'Erro de conectividade');
+                showNotification('Erro de conectividade com GitHub: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

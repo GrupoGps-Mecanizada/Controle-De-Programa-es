@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle De Equipamentos e Programações - GrupoGps</title>
-
-    <!-- Bibliotecas -->
+    <title>Controle da Frota - GrupoGPS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
     <style>
         * {
             margin: 0;
@@ -19,302 +14,206 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #2c3e50;
-            line-height: 1.6;
-            min-height: 100vh;
+            background: #f8f9fa;
+            color: #212529;
+            line-height: 1.4;
         }
 
-        .app-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(10px);
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        /* Header Sofisticado */
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1.5rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .header-brand h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .sync-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50px;
-            font-size: 0.9rem;
-            color: #5a6c7d;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .last-update-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .sync-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .sync-dot.success { background: #27ae60; }
-        .sync-dot.error { background: #e74c3c; }
-        .sync-dot.loading { background: #f39c12; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-            max-width: 1600px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* Glass Panel */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-            overflow: hidden;
-        }
-
-        .panel-header {
-            padding: 1rem 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.5);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .panel-title {
-            font-weight: 700;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .panel-content {
-            padding: 1.5rem;
-        }
-
-        /* Compact Stats */
-        .compact-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .compact-stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
             text-align: center;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
+            border-left: 4px solid #007bff;
         }
 
-        .compact-stat-card:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.95);
-        }
-
-        .compact-stat-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .compact-stat-label {
-            font-size: 0.8rem;
-            color: #5a6c7d;
-            margin-top: 0.25rem;
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
             font-weight: 600;
         }
 
-        /* Controls */
-        .controls-row {
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
+            gap: 15px;
             align-items: center;
-            margin-bottom: 1.5rem;
             flex-wrap: wrap;
-            gap: 1rem;
         }
 
-        .search-group {
+        .period-selector {
             display: flex;
-            gap: 0.5rem;
+            gap: 10px;
             align-items: center;
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            flex-shrink: 0;
+        }
+
+        .period-selector label {
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .period-selector select {
+            padding: 8px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        .period-selector select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+            padding: 10px 20px;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            border-radius: 4px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        .btn-primary {
+            background: #007bff;
+            color: white;
         }
 
-        .btn.success {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        .btn-primary:hover {
+            background: #0056b3;
         }
 
-        .btn.warning {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
+        .btn-primary:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
         }
 
-        .btn.danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
-
-        .btn.secondary {
-            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-        }
-
-        input[type="text"] {
-            padding: 0.75rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            background: rgba(255, 255, 255, 0.8);
-            transition: all 0.3s ease;
-            color: #2c3e50;
-            width: 300px;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            background: rgba(255, 255, 255, 0.95);
-        }
-
-        /* Equipment Table */
-        .equipment-table {
+        .btn-outline {
             background: white;
-            border-radius: 15px;
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+
+        .btn-outline:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .data-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 14px;
         }
 
         th {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 15px 10px;
+            background: #f8f9fa;
+            color: #495057;
+            padding: 15px 12px;
             text-align: left;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #dee2e6;
         }
 
         td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #f8f9fa;
-            font-size: 0.85rem;
+            padding: 12px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: top;
+            color: #212529;
         }
 
         tr:hover {
             background: #f8f9fa;
         }
 
-        /* Loading States */
-        .loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            color: #5a6c7d;
+        .equipment-cell {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .location-text {
+            color: #495057;
+            max-width: 200px;
+        }
+
+        .schedule-text {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .footer-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
         }
 
         .loading-spinner {
-            width: 3rem;
-            height: 3rem;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid #667eea;
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
+            margin: 0 auto 20px;
         }
 
         @keyframes spin {
@@ -322,1103 +221,574 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Footer */
-        .footer {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 2rem;
+        .no-data {
             text-align: center;
-            color: #5a6c7d;
-            font-size: 0.9rem;
+            padding: 40px;
+            color: #6c757d;
         }
 
-        .footer strong {
-            color: #2c3e50;
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border: 1px solid #f1aeb5;
         }
 
-        /* Notificações */
-        .notification {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            z-index: 10000;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            animation: slideInRight 0.3s ease-out;
-            max-width: 400px;
-            backdrop-filter: blur(20px);
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid #c3e6cb;
+            font-size: 13px;
         }
 
-        .notification.success { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        .notification.error { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-        .notification.warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
-        .notification.info { background: linear-gradient(135deg, #3498db, #2980b9); }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .info-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid #bee5eb;
+            font-size: 13px;
         }
 
-        /* Status de validação */
-        .validation-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 1rem 0;
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .validation-status.success {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #16a34a;
-        }
-
-        .validation-status.warning {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            color: #d97706;
-        }
-
-        .validation-status.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #dc2626;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
+            .container {
+                padding: 10px;
             }
-
-            .header-brand h1 {
-                font-size: 1.5rem;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .controls-row {
+            
+            .controls {
                 flex-direction: column;
                 align-items: stretch;
             }
-
-            .search-group {
+            
+            .period-selector {
+                width: 100%;
                 justify-content: center;
             }
-
-            input[type="text"] {
-                width: 100%;
+            
+            .period-selector select {
+                min-width: 100%;
             }
-
-            .compact-stats {
-                grid-template-columns: repeat(2, 1fr);
+            
+            .search-input {
+                min-width: 100%;
             }
-
+            
             table {
-                font-size: 0.8rem;
+                font-size: 12px;
             }
-
+            
             th, td {
                 padding: 8px 6px;
             }
         }
 
-        /* Hidden utilities */
-        .hidden { display: none !important; }
+        @media print {
+            body { 
+                background: white; 
+                font-size: 12px;
+            }
+            .header, .controls, .footer-info, .success-message, .info-message { 
+                display: none !important; 
+            }
+            .container {
+                padding: 0;
+                margin: 0;
+                max-width: 100%;
+            }
+            .data-table { 
+                box-shadow: none; 
+                border: 1px solid #dee2e6; 
+                margin: 0;
+            }
+            table {
+                width: 100%;
+                font-size: 11px;
+            }
+            th, td {
+                padding: 6px 4px;
+                border: 1px solid #dee2e6;
+            }
+            th {
+                background: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="header-brand">
-                    <h1>🚛 Controle De Equipamentos e Programações - GrupoGps</h1>
-                </div>
-                
-                <div class="header-controls">
-                    <div class="sync-indicator">
-                        <div class="sync-dot loading" id="syncDot"></div>
-                        <span id="syncStatus">Carregando dados...</span>
-                    </div>
-                    
-                    <div class="last-update-info">
-                        <span style="font-size: 0.85rem; color: #5a6c7d;">Última atualização:</span>
-                        <span id="lastUpdateTime" style="font-weight: 600; color: #2c3e50;">--:--</span>
-                    </div>
+    <div class="container">
+        <div class="header">
+            <h1>Controle da Frota</h1>
+        </div>
+
+        <div class="controls">
+            <div class="period-selector">
+                <label for="periodSelect">🕐 Período:</label>
+                <select id="periodSelect" onchange="carregarDados()">
+                    <option value="manha">Manhã (a partir das 07:00)</option>
+                    <option value="noite">Noite (a partir das 19:00)</option>
+                    <option value="dia_todo" selected>Dia Todo (24h)</option>
+                </select>
+            </div>
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por vaga, equipamento, motorista ou local...">
+            <button id="btnAtualizar" class="btn btn-primary" onclick="carregarDados()">Atualizar</button>
+            <button class="btn btn-outline" onclick="window.print()">Imprimir</button>
+            <button class="btn btn-outline" onclick="exportarCSV()">Exportar CSV</button>
+        </div>
+
+        <div class="data-table">
+            <div id="tableContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>Carregando dados...</div>
                 </div>
             </div>
-        </header>
+        </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Estatísticas Compactas -->
-            <div class="compact-stats" id="compactStats">
-                <div class="compact-stat-card">
-                    <div class="compact-stat-value" id="totalEquipamentos">0</div>
-                    <div class="compact-stat-label">Equipamentos</div>
-                </div>
-                <div class="compact-stat-card">
-                    <div class="compact-stat-value" id="totalProgramacoes">0</div>
-                    <div class="compact-stat-label">Programações</div>
-                </div>
-                <div class="compact-stat-card">
-                    <div class="compact-stat-value" id="equipamentosComMotorista">0</div>
-                    <div class="compact-stat-label">Com Motorista</div>
-                </div>
-                <div class="compact-stat-card">
-                    <div class="compact-stat-value" id="dataAtual">--</div>
-                    <div class="compact-stat-label">Data Atual</div>
-                </div>
-            </div>
-
-            <!-- Status de Validação -->
-            <div id="validationStatus" class="validation-status hidden">
-                <span id="validationIcon">✅</span>
-                <span id="validationMessage">Dados validados com sucesso</span>
-            </div>
-
-            <!-- Painel Principal -->
-            <div class="glass-panel">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <span>📋</span>
-                        Equipamentos e Programações Consolidadas
-                    </div>
-                    <div id="totalRegistros" style="font-size: 0.9rem; color: #5a6c7d;">
-                        0 registros
-                    </div>
-                </div>
-                <div class="panel-content">
-                    <!-- Controles -->
-                    <div class="controls-row">
-                        <div class="search-group">
-                            <input type="text" id="searchInput" placeholder="Buscar por vaga, equipamento ou motorista..." />
-                            <button class="btn" onclick="filtrarTabela()">
-                                <span>🔍</span>
-                                Buscar
-                            </button>
-                        </div>
-                        
-                        <div class="search-group">
-                            <button class="btn danger" onclick="exportarPDF()">
-                                <span>📑</span>
-                                Exportar PDF
-                            </button>
-                            <button class="btn" onclick="atualizarDados()">
-                                <span>🔄</span>
-                                Atualizar
-                            </button>
-                            <button class="btn secondary" onclick="executarDiagnostico()">
-                                <span>🔍</span>
-                                Diagnóstico
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Tabela de Dados -->
-                    <div class="equipment-table" id="dataTable">
-                        <div class="loading-state">
-                            <div class="loading-spinner"></div>
-                            <div>Carregando dados do GitHub...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>Desenvolvido por <strong>Warlison Abreu</strong> | © 2025 GrupoGPS - Todos os direitos reservados</p>
-        </footer>
+        <div class="footer-info" id="footerInfo">
+            Desenvolvido por Warlison Abreu | Aguardando carregamento...
+        </div>
     </div>
 
     <script>
-        /*********************************
-         * CONFIGURAÇÕES GITHUB          *
-         *********************************/
+        // Configuração do repositório GitHub
         const GITHUB_CONFIG = {
-            TOKEN: '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',
-            OWNER: 'GrupoGps-Mecanizada',
-            REPO: 'Controle-De-Programa-es',
-            BRANCH: 'main',
-            FILES: {
-                APROPRIACOES: 'data/apropriacoes/apropriacao-latest.csv',
-                ATENDIMENTOS: 'data/atendimentos/atendimento-latest.csv',
-                CHECKLIST: 'data/checklist-dados.csv'
+            owner: 'GrupoGps-Mecanizada',
+            repo: 'Banco-De-Dados',
+            branch: 'main',
+            paths: {
+                programacoes: 'Programações/programacoes-atendimento.csv',
+                checklist: 'Checklist/checklist-operacoes.csv',
+                captured: 'Timeline/captured-data.csv'
             }
         };
 
-        /*********************************
-         * ORDENAÇÃO DE EQUIPAMENTOS     *
-         *********************************/
-        const ORDEM_EQUIPAMENTOS = [
-            // ALTA PRESSÃO (AP)
-            'AP - 01 - 24HS',
-            'AP - 02',
-            'AP - 03', 
-            'AP - 04',
-            'AP - 05',
-            'AP - 06',
-            'AP - 07',
-            'AP - 08 - 24HS',
-            'AP - 09',
-            'AP - 10',
-            'AP - 11',
-            'AP - 12',
-            // AUTO VÁCUO (AV)
-            'AV - 01 - 16HS',
-            'AV - 02 - 16HS',
-            'AV - 03',
-            'AV - 04',
-            'AV - 05',
-            'AV - 06', 
-            'AV - 07',
-            'AV - 08 - 24HS',
-            'AV - 09',
-            'AV - 10',
-            // HIPER VÁCUO (HV)
-            'HV - 01',
-            'HV - 02'
-        ];
+        // Configuração de períodos
+        // Manhã: programações com horários a partir de 07:00 até 18:59
+        // Noite: programações com horários a partir de 19:00 ou até 06:59
+        const PERIODOS = {
+            'manha': { inicio: 7, fim: 19, nome: 'Manhã (a partir das 07:00)' },
+            'noite': { inicio: 19, fim: 7, nome: 'Noite (a partir das 19:00)' },
+            'dia_todo': { inicio: 0, fim: 24, nome: 'Dia Todo' }
+        };
 
-        function aplicarSiglas(nomeEquipamento) {
-            if (!nomeEquipamento) return '';
-            
-            let resultado = nomeEquipamento;
-            
-            // Aplicar siglas
-            resultado = resultado.replace(/CAMINHÃO ALTA PRESSÃO/g, 'AP');
-            resultado = resultado.replace(/CAMINHÃO AUTO VÁCUO/g, 'AV');
-            resultado = resultado.replace(/CAMINHÃO HIPER VÁCUO/g, 'HV');
-            
-            // Limpar redundâncias
-            resultado = resultado.replace(/- GPS/g, '');
-            resultado = resultado.replace(/24 HS/g, '24HS');
-            resultado = resultado.replace(/16 HS/g, '16HS');
-            
-            // Limpar espaços duplos
-            resultado = resultado.replace(/\s+/g, ' ').trim();
-            
-            return resultado;
-        }
-
-        /*********************************
-         * ESTADO GLOBAL                 *
-         *********************************/
+        // Dados globais
         let dadosConsolidados = [];
         let dadosFiltrados = [];
-        let lastSyncTime = null;
-        let validationResults = {
-            status: 'pending',
-            message: '',
-            errors: [],
-            warnings: []
+        let todosOsDados = {
+            programacoes: [],
+            checklist: [],
+            captured: []
         };
 
-        /*********************************
-         * FUNÇÕES DE SEGURANÇA E VALIDAÇÃO *
-         *********************************/
-        function validarDadosEntrada(dados, nomeArquivo) {
-            const resultados = {
-                valido: true,
-                erros: [],
-                avisos: [],
-                estatisticas: {
-                    total: dados.length,
-                    validos: 0,
-                    invalidos: 0
+        // Função para buscar arquivo do GitHub
+        async function buscarArquivoGitHub(path) {
+            const url = `https://raw.githubusercontent.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/${GITHUB_CONFIG.branch}/${path}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            };
-
-            if (!Array.isArray(dados)) {
-                resultados.valido = false;
-                resultados.erros.push(`${nomeArquivo}: Dados não são um array válido`);
-                return resultados;
+                const text = await response.text();
+                return text;
+            } catch (error) {
+                console.error(`Erro ao buscar ${path}:`, error);
+                throw error;
             }
+        }
+
+        // Função para detectar delimitador do CSV
+        function detectarDelimitador(texto) {
+            const delimitadores = [';', ',', '\t', '|'];
+            let melhorDelimitador = ',';
+            let maxColunas = 0;
+            
+            delimitadores.forEach(delim => {
+                const linhas = texto.split('\n').slice(0, 5);
+                const colunas = linhas[0] ? linhas[0].split(delim).length : 0;
+                if (colunas > maxColunas) {
+                    maxColunas = colunas;
+                    melhorDelimitador = delim;
+                }
+            });
+            
+            return melhorDelimitador;
+        }
+
+        // Função para verificar se horário está no período selecionado
+        function horarioNoPeriodo(horarioStr, periodo) {
+            if (periodo === 'dia_todo') return true;
+            if (!horarioStr || typeof horarioStr !== 'string') return false;
+            
+            // Extrair todas as horas mencionadas no horário
+            const matches = horarioStr.match(/(\d{1,2}):(\d{2})/g);
+            if (!matches || matches.length === 0) return false;
+            
+            // Converter horas para números
+            const horas = matches.map(h => parseInt(h.split(':')[0]));
+            
+            if (periodo === 'manha') {
+                // Manhã: qualquer programação que tenha horário >= 07:00 e < 19:00
+                return horas.some(h => h >= 7 && h < 19);
+            } else if (periodo === 'noite') {
+                // Noite: qualquer programação que tenha horário >= 19:00 ou < 07:00
+                return horas.some(h => h >= 19 || h < 7);
+            }
+            
+            return false;
+        }
+
+        // Função para encontrar equipamento na vaga
+        // Retorna o equipamento mais frequente nos registros da vaga
+        function encontrarEquipamento(vaga, capturedData) {
+            if (!vaga || !capturedData) return null;
+            
+            // Busca direta pelo nome da vaga
+            const registros = capturedData.filter(item => 
+                item.VAGA === vaga && item.EQUIPAMENTO && item.EQUIPAMENTO.trim() !== ''
+            );
+            
+            if (registros.length === 0) return null;
+            
+            // Se só tem um registro, retorna direto
+            if (registros.length === 1) return registros[0].EQUIPAMENTO;
+            
+            // Retorna o equipamento mais frequente ou o primeiro encontrado
+            const equipamentos = {};
+            registros.forEach(r => {
+                equipamentos[r.EQUIPAMENTO] = (equipamentos[r.EQUIPAMENTO] || 0) + 1;
+            });
+            
+            // Encontra o equipamento mais frequente
+            let maisFrequente = null;
+            let maxCount = 0;
+            for (const [equip, count] of Object.entries(equipamentos)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    maisFrequente = equip;
+                }
+            }
+            
+            return maisFrequente;
+        }
+
+        // Função para buscar motorista mais recente
+        // Para manhã: busca checklist feito entre 06:00 e 14:00
+        // Para noite: busca checklist feito entre 18:00 e 02:00 (próximo dia)
+        // Se não encontrar no período, busca o mais recente de qualquer horário
+        function buscarMotorista(placa, checklistData, periodo = 'dia_todo') {
+            if (!placa || !checklistData) return 'NÃO IDENTIFICADO';
+            
+            // Busca todos os registros da placa
+            let registrosPlaca = checklistData.filter(item => item.Placa === placa);
+            
+            if (registrosPlaca.length === 0) return 'NÃO IDENTIFICADO';
+            
+            // Se tem período específico, filtra por horário do checklist
+            if (periodo !== 'dia_todo') {
+                registrosPlaca = registrosPlaca.filter(item => {
+                    const dataHora = item['Data/Hora Início'];
+                    if (!dataHora) return false;
+                    
+                    const match = dataHora.match(/(\d{1,2}):(\d{2})/);
+                    if (!match) return false;
+                    
+                    const hora = parseInt(match[1]);
+                    
+                    if (periodo === 'manha') {
+                        // Checklist da manhã: entre 06:00 e 14:00
+                        return hora >= 6 && hora < 14;
+                    } else if (periodo === 'noite') {
+                        // Checklist da noite: entre 18:00 e 23:59 ou 00:00 e 02:00
+                        return hora >= 18 || hora <= 2;
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            // Se não encontrou motorista no período específico, busca em qualquer horário
+            if (registrosPlaca.length === 0 && periodo !== 'dia_todo') {
+                registrosPlaca = checklistData.filter(item => item.Placa === placa);
+            }
+            
+            if (registrosPlaca.length === 0) return 'NÃO IDENTIFICADO';
+            
+            // Ordena por data/hora de início (mais recente primeiro)
+            // Formato esperado: DD/MM/YYYY HH:MM:SS
+            registrosPlaca.sort((a, b) => {
+                // Converte DD/MM/YYYY HH:MM:SS para formato parseável
+                const converterData = (dataStr) => {
+                    if (!dataStr) return new Date(0);
+                    // Separa data e hora
+                    const partes = dataStr.split(' ');
+                    if (partes.length < 2) return new Date(0);
+                    
+                    const dataParts = partes[0].split('/');
+                    const dia = dataParts[0].padStart(2, '0');
+                    const mes = dataParts[1].padStart(2, '0');
+                    const ano = dataParts[2];
+                    const hora = partes[1] || '00:00:00';
+                    
+                    // Cria a data no formato ISO
+                    return new Date(`${ano}-${mes}-${dia}T${hora}`);
+                };
+                
+                const dataA = converterData(a['Data/Hora Início']);
+                const dataB = converterData(b['Data/Hora Início']);
+                return dataB - dataA;
+            });
+            
+            // Retorna o motorista mais recente
+            return registrosPlaca[0].Motorista || 'NÃO IDENTIFICADO';
+        }
+
+        async function carregarDados() {
+            const btnAtualizar = document.getElementById('btnAtualizar');
+            btnAtualizar.disabled = true;
+            
+            try {
+                document.getElementById('tableContainer').innerHTML = `
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Conectando ao GitHub...</div>
+                    </div>
+                `;
+
+                // Buscar todos os arquivos apenas se ainda não foram carregados
+                if (todosOsDados.programacoes.length === 0) {
+                    console.log('Carregando dados do GitHub...');
+                    
+                    // Buscar programações
+                    const atendimentosContent = await buscarArquivoGitHub(GITHUB_CONFIG.paths.programacoes);
+                    const delimitadorAtendimentos = detectarDelimitador(atendimentosContent);
+                    todosOsDados.programacoes = Papa.parse(atendimentosContent, { 
+                        header: true, 
+                        delimiter: delimitadorAtendimentos,
+                        skipEmptyLines: true,
+                        transformHeader: (header) => header.trim()
+                    }).data.filter(item => item.Vaga && item.Vaga !== '--');
+
+                    // Buscar checklist
+                    const checklistContent = await buscarArquivoGitHub(GITHUB_CONFIG.paths.checklist);
+                    const delimitadorChecklist = detectarDelimitador(checklistContent);
+                    todosOsDados.checklist = Papa.parse(checklistContent, { 
+                        header: true,
+                        delimiter: delimitadorChecklist,
+                        skipEmptyLines: true,
+                        transformHeader: (header) => header.trim()
+                    }).data;
+                    
+                    // Buscar rastreamento
+                    const capturedContent = await buscarArquivoGitHub(GITHUB_CONFIG.paths.captured);
+                    const delimitadorCaptured = detectarDelimitador(capturedContent);
+                    todosOsDados.captured = Papa.parse(capturedContent, { 
+                        header: true,
+                        delimiter: delimitadorCaptured,
+                        skipEmptyLines: true,
+                        transformHeader: (header) => header.trim()
+                    }).data;
+
+                    console.log('Dados carregados com sucesso!');
+                }
+
+                // Filtrar programações pelo período selecionado
+                const periodoSelecionado = document.getElementById('periodSelect').value;
+                const programacoesAtivas = todosOsDados.programacoes.filter(item => {
+                    const horario = item['Data/Hora'];
+                    return horario && horarioNoPeriodo(horario, periodoSelecionado);
+                });
+
+                console.log(`Programações no período ${periodoSelecionado}: ${programacoesAtivas.length}`);
+
+                // Consolidar dados
+                dadosConsolidados = [];
+                
+                for (const programacao of programacoesAtivas) {
+                    const vaga = programacao.Vaga;
+                    const local = programacao['Área(local)'] || 'NÃO INFORMADO';
+                    const horario = programacao['Data/Hora'] || 'N/A';
+                    
+                    // Buscar equipamento
+                    const equipamento = encontrarEquipamento(vaga, todosOsDados.captured) || 'NÃO APROPRIADO';
+                    
+                    // Buscar motorista
+                    const motorista = equipamento !== 'NÃO APROPRIADO' 
+                        ? buscarMotorista(equipamento, todosOsDados.checklist, periodoSelecionado)
+                        : 'NÃO IDENTIFICADO';
+                    
+                    dadosConsolidados.push({
+                        vaga: vaga,
+                        placa: equipamento,
+                        motorista: motorista,
+                        localAtual: local,
+                        horarioProgramacao: horario
+                    });
+                }
+
+                // Ordenar por vaga
+                dadosConsolidados.sort((a, b) => a.vaga.localeCompare(b.vaga));
+
+                dadosFiltrados = [...dadosConsolidados];
+                atualizarInterface();
+                atualizarRodape();
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                document.getElementById('tableContainer').innerHTML = `
+                    <div class="error-message">
+                        <strong>Erro ao carregar dados:</strong> ${error.message}
+                        <br><br>
+                        <small>Verifique se os arquivos estão disponíveis no repositório:
+                        <br>- ${GITHUB_CONFIG.paths.programacoes}
+                        <br>- ${GITHUB_CONFIG.paths.checklist}
+                        <br>- ${GITHUB_CONFIG.paths.captured}</small>
+                    </div>
+                `;
+            } finally {
+                btnAtualizar.disabled = false;
+            }
+        }
+
+        function atualizarInterface() {
+            renderizarTabela();
+        }
+
+        function renderizarTabela() {
+            const container = document.getElementById('tableContainer');
+            const dados = dadosFiltrados.length > 0 ? dadosFiltrados : dadosConsolidados;
+            const periodoSelecionado = document.getElementById('periodSelect').value;
+            const nomePeriodo = PERIODOS[periodoSelecionado]?.nome || periodoSelecionado;
 
             if (dados.length === 0) {
-                resultados.valido = false;
-                resultados.erros.push(`${nomeArquivo}: Arquivo está vazio`);
-                return resultados;
-            }
-
-            // Validar estrutura dos dados
-            dados.forEach((item, index) => {
-                try {
-                    if (!item || typeof item !== 'object') {
-                        resultados.erros.push(`${nomeArquivo}: Linha ${index + 1} - Item inválido`);
-                        resultados.estatisticas.invalidos++;
-                        return;
-                    }
-
-                    // Sanitizar dados
-                    Object.keys(item).forEach(key => {
-                        if (typeof item[key] === 'string') {
-                            item[key] = item[key].trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-                        }
-                    });
-
-                    resultados.estatisticas.validos++;
-                } catch (error) {
-                    resultados.erros.push(`${nomeArquivo}: Linha ${index + 1} - Erro de processamento: ${error.message}`);
-                    resultados.estatisticas.invalidos++;
-                }
-            });
-
-            if (resultados.estatisticas.invalidos > 0) {
-                resultados.avisos.push(`${nomeArquivo}: ${resultados.estatisticas.invalidos} registros com problemas encontrados`);
-            }
-
-            console.log(`✅ Validação ${nomeArquivo}:`, resultados);
-            return resultados;
-        }
-
-        function sanitizarTexto(texto) {
-            if (!texto) return '';
-            
-            return String(texto)
-                .trim()
-                .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove caracteres de controle
-                .replace(/[^\w\s\-\/\.\:\,\(\)]/g, '') // Remove caracteres especiais perigosos
-                .substring(0, 500); // Limita tamanho para evitar overflow
-        }
-
-        function ordenarEquipamentos(dados) {
-            return dados.sort((a, b) => {
-                const equipamentoA = a.equipamento;
-                const equipamentoB = b.equipamento;
-                
-                // Encontrar índice na ordem predefinida
-                let indexA = -1;
-                let indexB = -1;
-                
-                // Buscar correspondência mais precisa
-                for (let i = 0; i < ORDEM_EQUIPAMENTOS.length; i++) {
-                    const padrao = ORDEM_EQUIPAMENTOS[i];
-                    
-                    if (equipamentoA.includes(padrao)) {
-                        indexA = i;
-                    }
-                    if (equipamentoB.includes(padrao)) {
-                        indexB = i;
-                    }
-                }
-                
-                // Se ambos estão na lista de ordem, usar a ordem predefinida
-                if (indexA !== -1 && indexB !== -1) {
-                    return indexA - indexB;
-                }
-                
-                // Se apenas um está na lista, ele vem primeiro
-                if (indexA !== -1) return -1;
-                if (indexB !== -1) return 1;
-                
-                // Se nenhum está na lista, ordem alfabética
-                return equipamentoA.localeCompare(equipamentoB);
-            });
-        }
-
-        function filtrarDuplicatasEquipamentos(apropriacoes) {
-            console.log('🔄 Removendo duplicatas de equipamentos...');
-            
-            // Agrupar por equipamento
-            const equipamentosMap = new Map();
-            
-            apropriacoes.forEach(apropriacao => {
-                const equipamento = apropriacao.Equipamento;
-                
-                if (!equipamentosMap.has(equipamento)) {
-                    equipamentosMap.set(equipamento, []);
-                }
-                
-                equipamentosMap.get(equipamento).push(apropriacao);
-            });
-            
-            // Para cada equipamento, pegar apenas a apropriação mais recente do período 06:00-11:00
-            const apropriacoesFiltradas = [];
-            
-            equipamentosMap.forEach((apropriacoesEquipamento, equipamento) => {
-                // Filtrar por horário 06:00-11:00
-                const apropriacoesHorario = apropriacoesEquipamento.filter(item => {
-                    if (!item['Data/Hora inicial']) return false;
-                    
-                    const dataHora = item['Data/Hora inicial'];
-                    const horaParte = dataHora.split(' ')[1]; // Pegar apenas a hora
-                    
-                    if (!horaParte) return false;
-                    
-                    const [hora] = horaParte.split(':');
-                    const horaNum = parseInt(hora);
-                    
-                    return horaNum >= 6 && horaNum <= 11;
-                });
-                
-                if (apropriacoesHorario.length > 0) {
-                    // Ordenar por data/hora inicial e pegar a mais recente
-                    apropriacoesHorario.sort((a, b) => {
-                        return new Date(`2025-07-03 ${a['Data/Hora inicial'].split(' ')[1]}`) - 
-                               new Date(`2025-07-03 ${b['Data/Hora inicial'].split(' ')[1]}`);
-                    });
-                    
-                    // Pegar a apropriação mais recente
-                    apropriacoesFiltradas.push(apropriacoesHorario[apropriacoesHorario.length - 1]);
-                }
-            });
-            
-            console.log(`✅ Duplicatas removidas: ${apropriacoes.length} → ${apropriacoesFiltradas.length} registros`);
-            return apropriacoesFiltradas;
-        }
-
-        /*********************************
-         * FUNÇÕES DE ACESSO AO GITHUB   *
-         *********************************/
-        async function fetchGitHubFile(filePath) {
-            console.log(`🔄 Carregando arquivo: ${filePath}`);
-            
-            const MAX_RETRIES = 3;
-            let lastError;
-            
-            for (let tentativa = 1; tentativa <= MAX_RETRIES; tentativa++) {
-                try {
-                    console.log(`🔄 Tentativa ${tentativa}/${MAX_RETRIES} para ${filePath}`);
-                    
-                    // Método 1: API do GitHub
-                    const url = `https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/contents/${filePath}`;
-                    
-                    const response = await fetch(url, {
-                        headers: {
-                            'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        },
-                        timeout: 15000 // 15 segundos timeout
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        const content = atob(data.content.replace(/\s/g, ''));
-                        console.log(`✅ Arquivo carregado via API: ${filePath} (${content.length} caracteres)`);
-                        return content;
-                    }
-                    
-                    // Método 2: Raw GitHub (fallback)
-                    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/${GITHUB_CONFIG.BRANCH}/${filePath}`;
-                    const rawResponse = await fetch(rawUrl + '?v=' + Date.now());
-                    
-                    if (rawResponse.ok) {
-                        const content = await rawResponse.text();
-                        console.log(`✅ Arquivo carregado via RAW: ${filePath} (${content.length} caracteres)`);
-                        return content;
-                    }
-                    
-                    throw new Error(`Ambos os métodos falharam - API: ${response.status}, RAW: ${rawResponse.status}`);
-                    
-                } catch (error) {
-                    lastError = error;
-                    console.warn(`⚠️ Tentativa ${tentativa} falhou para ${filePath}:`, error.message);
-                    
-                    if (tentativa < MAX_RETRIES) {
-                        const delay = tentativa * 2000; // Delay progressivo
-                        console.log(`⏳ Aguardando ${delay}ms antes da próxima tentativa...`);
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    }
-                }
-            }
-            
-            throw new Error(`Falha ao carregar ${filePath} após ${MAX_RETRIES} tentativas. Último erro: ${lastError.message}`);
-        }
-
-        async function carregarTodosOsArquivos() {
-            try {
-                updateSyncStatus('loading', 'Iniciando carregamento seguro...');
-                updateValidationStatus('pending', 'Validando integridade dos dados...');
-                
-                console.log('🔄 === INÍCIO DO CARREGAMENTO SEGURO ===');
-                
-                // Carregar arquivos com timeout e retry
-                const [apropriacoesContent, atendimentosContent, checklistContent] = await Promise.all([
-                    fetchGitHubFile(GITHUB_CONFIG.FILES.APROPRIACOES),
-                    fetchGitHubFile(GITHUB_CONFIG.FILES.ATENDIMENTOS),
-                    fetchGitHubFile(GITHUB_CONFIG.FILES.CHECKLIST)
-                ]);
-                
-                // Processar e validar cada arquivo
-                const dadosApropriacoes = parseCSVContent(apropriacoesContent);
-                const dadosAtendimentos = parseCSVContent(atendimentosContent);
-                const dadosChecklist = parseCSVContent(checklistContent);
-                
-                // Validar dados de entrada
-                const validacaoApropriacoes = validarDadosEntrada(dadosApropriacoes, 'Apropriações');
-                const validacaoAtendimentos = validarDadosEntrada(dadosAtendimentos, 'Atendimentos');
-                const validacaoChecklist = validarDadosEntrada(dadosChecklist, 'Checklist');
-                
-                // Consolidar resultados de validação
-                const todasValidacoes = [validacaoApropriacoes, validacaoAtendimentos, validacaoChecklist];
-                const temErros = todasValidacoes.some(v => !v.valido);
-                
-                if (temErros) {
-                    const erros = todasValidacoes.flatMap(v => v.erros);
-                    updateValidationStatus('error', `Erros encontrados na validação: ${erros.length} problemas`);
-                    throw new Error(`Validação falhou: ${erros.join('; ')}`);
-                }
-                
-                console.log(`📊 Dados carregados e validados:
-                - Apropriações: ${dadosApropriacoes.length} registros
-                - Atendimentos: ${dadosAtendimentos.length} registros  
-                - Checklist: ${dadosChecklist.length} registros`);
-                
-                // Consolidar os dados
-                dadosConsolidados = consolidarDados(dadosApropriacoes, dadosAtendimentos, dadosChecklist);
-                
-                // Ordenar equipamentos conforme especificação
-                dadosConsolidados = ordenarEquipamentos(dadosConsolidados);
-                
-                lastSyncTime = new Date();
-                updateSyncStatus('success', `${dadosConsolidados.length} registros consolidados`);
-                updateValidationStatus('success', `Dados processados com segurança: ${dadosConsolidados.length} registros`);
-                updateLastSyncTime();
-                
-                atualizarInterface();
-                
-                showNotification(`✅ Dados carregados com segurança! ${dadosConsolidados.length} registros processados e ordenados.`, 'success');
-                
-            } catch (error) {
-                console.error('❌ Erro no carregamento:', error);
-                updateSyncStatus('error', 'Erro: ' + error.message);
-                updateValidationStatus('error', 'Falha na validação: ' + error.message);
-                showNotification('❌ Erro ao carregar dados: ' + error.message, 'error');
-            }
-        }
-
-        /*********************************
-         * FUNÇÕES DE PROCESSAMENTO      *
-         *********************************/
-        function parseCSVContent(csvString) {
-            try {
-                if (!csvString || csvString.trim().length === 0) {
-                    throw new Error('Conteúdo CSV está vazio');
-                }
-                
-                console.log('🔄 Iniciando parse seguro do CSV...');
-                
-                // Detectar delimiter de forma mais robusta
-                const delimiters = [',', ';', '\t'];
-                let bestDelimiter = ',';
-                let maxColumns = 0;
-                
-                for (const delimiter of delimiters) {
-                    const testResult = Papa.parse(csvString.substring(0, 1000), {
-                        delimiter: delimiter,
-                        header: true
-                    });
-                    
-                    if (testResult.meta.fields && testResult.meta.fields.length > maxColumns) {
-                        maxColumns = testResult.meta.fields.length;
-                        bestDelimiter = delimiter;
-                    }
-                }
-                
-                console.log(`🔍 Melhor delimitador detectado: "${bestDelimiter}" (${maxColumns} colunas)`);
-                
-                const result = Papa.parse(csvString, {
-                    header: true,
-                    skipEmptyLines: true,
-                    delimiter: bestDelimiter,
-                    transformHeader: header => sanitizarTexto(header),
-                    transform: (value) => sanitizarTexto(value),
-                    dynamicTyping: false // Manter como string para controle total
-                });
-                
-                if (result.errors.length > 0) {
-                    console.warn('⚠️ Avisos no parse CSV:', result.errors);
-                }
-                
-                const validData = result.data.filter(linha => {
-                    // Verificar se a linha tem pelo menos um campo não vazio
-                    return Object.values(linha).some(val => val && val.toString().trim() !== '');
-                });
-                
-                console.log(`✅ Parse concluído: ${validData.length} registros válidos de ${result.data.length} total`);
-                return validData;
-                
-            } catch (error) {
-                console.error('❌ Erro no parse CSV:', error);
-                throw new Error(`Erro ao processar CSV: ${error.message}`);
-            }
-        }
-
-        function consolidarDados(apropriacoes, atendimentos, checklist) {
-            console.log('🔄 Iniciando consolidação segura dos dados...');
-            
-            const hoje = new Date();
-            const dataAtual = hoje.toLocaleDateString('pt-BR');
-            
-            console.log(`📅 Filtrando dados para o dia: ${dataAtual}`);
-            
-            // Criar mapeamento seguro de equipamentos para motoristas
-            const equipamentoParaMotorista = {};
-            let motoristasMapeados = 0;
-            
-            checklist.forEach((item, index) => {
-                try {
-                    if (item.Placa && item.Motorista && 
-                        item.Placa !== '--' && 
-                        item.Placa.trim() !== '' &&
-                        item.Motorista.trim() !== '') {
-                        
-                        const placa = sanitizarTexto(item.Placa);
-                        const motorista = sanitizarTexto(item.Motorista);
-                        
-                        equipamentoParaMotorista[placa] = motorista;
-                        motoristasMapeados++;
-                    }
-                } catch (error) {
-                    console.warn(`⚠️ Erro no mapeamento linha ${index}:`, error.message);
-                }
-            });
-            
-            console.log(`👨‍💼 Motoristas mapeados com segurança: ${motoristasMapeados}`);
-            
-            // Filtrar apropriações do dia atual
-            const apropriacoesDia = apropriacoes.filter((item, index) => {
-                try {
-                    // Validações de segurança
-                    if (!item.Equipamento || 
-                        item.Equipamento === '--' || 
-                        item.Equipamento.trim() === '') {
-                        return false;
-                    }
-                    
-                    if (!item['Data/Hora inicial']) {
-                        return false;
-                    }
-                    
-                    const dataInicial = item['Data/Hora inicial'].split(' ')[0];
-                    return dataInicial === dataAtual;
-                    
-                } catch (error) {
-                    console.warn(`⚠️ Erro ao filtrar linha ${index}:`, error.message);
-                    return false;
-                }
-            });
-            
-            // Remover duplicatas e filtrar por horário (06:00-11:00)
-            const apropriacoesFiltradas = filtrarDuplicatasEquipamentos(apropriacoesDia);
-            
-            console.log(`✅ Apropriações filtradas: ${apropriacoesFiltradas.length} registros únicos no horário 06:00-11:00`);
-            
-            // Consolidar dados de forma segura
-            const dadosConsolidados = [];
-            let sucessos = 0;
-            let erros = 0;
-            
-            apropriacoesFiltradas.forEach((apropriacao, index) => {
-                try {
-                    const vaga = sanitizarTexto(apropriacao.Vaga);
-                    const equipamentoOriginal = sanitizarTexto(apropriacao.Equipamento);
-                    const equipamentoComSigla = aplicarSiglas(equipamentoOriginal);
-                    
-                    // Buscar atendimento de forma segura
-                    let atendimento = null;
-                    try {
-                        atendimento = atendimentos.find(item => 
-                            item.Vaga && 
-                            sanitizarTexto(item.Vaga) === vaga
-                        );
-                    } catch (err) {
-                        console.warn(`⚠️ Erro ao buscar atendimento para vaga ${vaga}:`, err.message);
-                    }
-                    
-                    // Buscar motorista usando o nome original do equipamento
-                    const motorista = equipamentoParaMotorista[equipamentoOriginal] || 'Não identificado';
-                    
-                    const registro = {
-                        vaga: vaga || 'N/D',
-                        equipamento: equipamentoComSigla,
-                        motorista: motorista,
-                        programacao: atendimento ? sanitizarTexto(atendimento['Data/Hora']) : 'Programação não encontrada',
-                        area: atendimento ? sanitizarTexto(atendimento['Área(local)']) : 'Área não encontrada'
-                    };
-                    
-                    dadosConsolidados.push(registro);
-                    sucessos++;
-                    
-                } catch (error) {
-                    console.error(`❌ Erro ao processar registro ${index}:`, error.message);
-                    erros++;
-                }
-            });
-            
-            console.log(`📊 Consolidação concluída:
-            - Sucessos: ${sucessos}
-            - Erros: ${erros}
-            - Taxa de sucesso: ${(sucessos / (sucessos + erros) * 100).toFixed(1)}%`);
-            
-            return dadosConsolidados;
-        }
-
-        /*********************************
-         * FUNÇÕES DE INTERFACE          *
-         *********************************/
-        function atualizarInterface() {
-            atualizarEstatisticas();
-            exibirTabela();
-        }
-
-        function atualizarEstatisticas() {
-            const totalEquipamentos = new Set(dadosConsolidados.map(item => item.equipamento)).size;
-            const totalProgramacoes = dadosConsolidados.length;
-            const equipamentosComMotorista = dadosConsolidados.filter(item => item.motorista !== 'Não identificado').length;
-            const dataAtual = new Date().toLocaleDateString('pt-BR');
-            
-            document.getElementById('totalEquipamentos').textContent = totalEquipamentos;
-            document.getElementById('totalProgramacoes').textContent = totalProgramacoes;
-            document.getElementById('equipamentosComMotorista').textContent = equipamentosComMotorista;
-            document.getElementById('dataAtual').textContent = dataAtual.substring(0, 5); // DD/MM
-            document.getElementById('totalRegistros').textContent = `${dadosConsolidados.length} registros`;
-        }
-
-        function exibirTabela() {
-            const container = document.getElementById('dataTable');
-            const dados = dadosFiltrados.length > 0 ? dadosFiltrados : dadosConsolidados;
-            
-            if (!dados.length) {
-                container.innerHTML = '<div class="loading-state"><div>Nenhum dado encontrado</div></div>';
+                container.innerHTML = `<div class="no-data">Nenhum equipamento programado para: ${nomePeriodo}</div>`;
                 return;
             }
-            
-            let tableHTML = `
+
+            // Contar estatísticas
+            const totalVagas = dados.length;
+            const equipamentosApropriados = dados.filter(d => d.placa !== 'NÃO APROPRIADO').length;
+            const motoristasIdentificados = dados.filter(d => d.motorista !== 'NÃO IDENTIFICADO').length;
+
+            const rows = dados.map(item => `
+                <tr>
+                    <td class="equipment-cell">${item.vaga}</td>
+                    <td><strong>${item.placa}</strong></td>
+                    <td>${item.motorista}</td>
+                    <td class="location-text">${item.localAtual}</td>
+                    <td class="schedule-text">${item.horarioProgramacao}</td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="info-message">
+                    <strong>${nomePeriodo}</strong> | 
+                    Total: ${totalVagas} vagas | 
+                    Apropriados: ${equipamentosApropriados} | 
+                    Identificados: ${motoristasIdentificados}
+                </div>
                 <table>
                     <thead>
                         <tr>
                             <th>Vaga</th>
                             <th>Equipamento</th>
                             <th>Motorista</th>
-                            <th>Programação</th>
-                            <th>Área</th>
+                            <th>Local Programado</th>
+                            <th>Horário</th>
                         </tr>
                     </thead>
                     <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
             `;
-            
-            dados.forEach(registro => {
-                tableHTML += `
-                    <tr>
-                        <td>${registro.vaga}</td>
-                        <td><strong>${registro.equipamento}</strong></td>
-                        <td>${registro.motorista}</td>
-                        <td>${registro.programacao}</td>
-                        <td>${registro.area}</td>
-                    </tr>
-                `;
-            });
-            
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
         }
 
-        function filtrarTabela() {
-            const searchTerm = sanitizarTexto(document.getElementById('searchInput').value).toLowerCase();
+        function filtrarDados() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
             
             if (!searchTerm) {
-                dadosFiltrados = [];
-                exibirTabela();
+                dadosFiltrados = [...dadosConsolidados];
+            } else {
+                dadosFiltrados = dadosConsolidados.filter(item => 
+                    item.vaga.toLowerCase().includes(searchTerm) ||
+                    item.placa.toLowerCase().includes(searchTerm) ||
+                    item.motorista.toLowerCase().includes(searchTerm) ||
+                    item.localAtual.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            renderizarTabela();
+        }
+
+        function exportarCSV() {
+            const dados = dadosFiltrados.length > 0 ? dadosFiltrados : dadosConsolidados;
+            
+            if (dados.length === 0) {
+                alert('Não há dados para exportar');
                 return;
             }
             
-            dadosFiltrados = dadosConsolidados.filter(registro => {
-                return (
-                    registro.vaga.toLowerCase().includes(searchTerm) ||
-                    registro.equipamento.toLowerCase().includes(searchTerm) ||
-                    registro.motorista.toLowerCase().includes(searchTerm) ||
-                    registro.area.toLowerCase().includes(searchTerm)
-                );
-            });
+            const periodoSelecionado = document.getElementById('periodSelect').value;
             
-            exibirTabela();
-            
-            if (dadosFiltrados.length === 0) {
-                showNotification('Nenhum resultado encontrado para a busca.', 'warning');
-            } else {
-                showNotification(`${dadosFiltrados.length} registros encontrados.`, 'success');
-            }
+            const BOM = '\uFEFF';
+            const headers = ['Vaga', 'Equipamento', 'Motorista', 'Local Programado', 'Horário'];
+            const csvContent = BOM + [
+                headers.join(';'),
+                ...dados.map(item => [
+                    item.vaga,
+                    item.placa,
+                    item.motorista,
+                    item.localAtual,
+                    item.horarioProgramacao
+                ].map(field => `"${field}"`).join(';'))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const agora = new Date();
+            const timestamp = agora.toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
+            link.download = `controle_frota_${periodoSelecionado}_${timestamp}.csv`;
+            link.click();
         }
 
-        /*********************************
-         * EXPORTAÇÃO PDF                *
-         *********************************/
-        function exportarPDF() {
-            try {
-                const dados = dadosFiltrados.length > 0 ? dadosFiltrados : dadosConsolidados;
-                
-                if (!dados.length) {
-                    showNotification('Nenhum dado para exportar.', 'warning');
-                    return;
-                }
-                
-                showNotification('Gerando PDF...', 'info');
-                
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('landscape', 'mm', 'a4');
-                
-                // Configurações do documento
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const margin = 20;
-                
-                // Cabeçalho simplificado
-                doc.setFontSize(18);
-                doc.setFont(undefined, 'bold');
-                doc.text('Controle de Equipamentos e Programações', pageWidth / 2, 30, { align: 'center' });
-                
-                // Data/hora do relatório
-                doc.setFontSize(10);
-                const agora = new Date().toLocaleString('pt-BR');
-                doc.text(`Gerado em: ${agora}`, margin, 45);
-                doc.text(`Total de registros: ${dados.length}`, pageWidth - margin - 50, 45);
-                
-                // Preparar dados para a tabela (sem Data/Hora Inicial e Final)
-                const colunas = [
-                    'Vaga',
-                    'Equipamento', 
-                    'Motorista',
-                    'Programação',
-                    'Área'
-                ];
-                
-                const linhas = dados.map(registro => [
-                    registro.vaga,
-                    registro.equipamento,
-                    registro.motorista,
-                    registro.programacao,
-                    registro.area
-                ]);
-                
-                // Configurar tabela
-                doc.autoTable({
-                    head: [colunas],
-                    body: linhas,
-                    startY: 55,
-                    theme: 'striped',
-                    styles: {
-                        fontSize: 9,
-                        cellPadding: 4,
-                        overflow: 'linebreak',
-                        halign: 'left'
-                    },
-                    headStyles: {
-                        fillColor: [102, 126, 234],
-                        textColor: 255,
-                        fontStyle: 'bold',
-                        fontSize: 10
-                    },
-                    alternateRowStyles: {
-                        fillColor: [245, 245, 245]
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 35 }, // Vaga
-                        1: { cellWidth: 60 }, // Equipamento
-                        2: { cellWidth: 55 }, // Motorista
-                        3: { cellWidth: 60 }, // Programação
-                        4: { cellWidth: 45 }  // Área
-                    },
-                    margin: { top: 55, left: margin, right: margin },
-                    didDrawPage: function(data) {
-                        // Número da página (sem rodapé com créditos)
-                        doc.setFontSize(8);
-                        doc.setFont(undefined, 'normal');
-                        doc.text(
-                            `Página ${data.pageNumber}`,
-                            pageWidth / 2,
-                            pageHeight - 10,
-                            { align: 'center' }
-                        );
-                    }
-                });
-                
-                // Salvar o PDF
-                const nomeArquivo = `Controle_Equipamentos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '_')}.pdf`;
-                doc.save(nomeArquivo);
-                
-                showNotification(`PDF exportado com sucesso: ${nomeArquivo}`, 'success');
-                
-            } catch (error) {
-                console.error('❌ Erro ao exportar PDF:', error);
-                showNotification('Erro ao gerar PDF: ' + error.message, 'error');
-            }
-        }
-
-        function atualizarDados() {
-            carregarTodosOsArquivos();
-        }
-
-        /*********************************
-         * FUNÇÕES AUXILIARES            *
-         *********************************/
-        function updateSyncStatus(status, message) {
-            const dot = document.getElementById('syncDot');
-            const statusText = document.getElementById('syncStatus');
-            
-            dot.className = 'sync-dot';
-            dot.classList.add(status);
-            statusText.textContent = message;
-        }
-
-        function updateValidationStatus(status, message) {
-            const container = document.getElementById('validationStatus');
-            const icon = document.getElementById('validationIcon');
-            const messageElement = document.getElementById('validationMessage');
-            
-            container.className = `validation-status ${status}`;
-            messageElement.textContent = message;
-            
-            switch(status) {
-                case 'success':
-                    icon.textContent = '✅';
-                    container.classList.remove('hidden');
-                    break;
-                case 'error':
-                    icon.textContent = '❌';
-                    container.classList.remove('hidden');
-                    break;
-                case 'warning':
-                    icon.textContent = '⚠️';
-                    container.classList.remove('hidden');
-                    break;
-                case 'pending':
-                    icon.textContent = '🔄';
-                    container.classList.remove('hidden');
-                    break;
-                default:
-                    container.classList.add('hidden');
-            }
-        }
-
-        function updateLastSyncTime() {
-            const lastUpdateTimeElement = document.getElementById('lastUpdateTime');
-            if (lastUpdateTimeElement) {
-                lastUpdateTimeElement.textContent = new Date().toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            }
-        }
-
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOutRight 0.3s ease-in';
-                setTimeout(() => notification.remove(), 300);
-            }, 5000);
-        }
-
-        async function executarDiagnostico() {
-            try {
-                console.log('🔍 === INICIANDO DIAGNÓSTICO COMPLETO ===');
-                
-                updateValidationStatus('pending', 'Executando diagnóstico completo...');
-                
-                // Teste de conectividade
-                console.log('🌐 Testando conectividade...');
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}`, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Erro de conectividade: ${response.status}`);
-                }
-                
-                const repoInfo = await response.json();
-                console.log(`✅ Conectado ao repositório: ${repoInfo.full_name}`);
-                
-                // Verificar estrutura de arquivos
-                console.log('📂 Verificando arquivos...');
-                for (const [nome, caminho] of Object.entries(GITHUB_CONFIG.FILES)) {
-                    try {
-                        const fileResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.OWNER}/${GITHUB_CONFIG.REPO}/contents/${caminho}`, {
-                            headers: {
-                                'Authorization': `token ${GITHUB_CONFIG.TOKEN}`,
-                                'Accept': 'application/vnd.github.v3+json'
-                            }
-                        });
-                        
-                        console.log(`  ${nome}: ${fileResponse.ok ? '✅' : '❌'} (${fileResponse.status})`);
-                    } catch (err) {
-                        console.log(`  ${nome}: ❌ Erro - ${err.message}`);
-                    }
-                }
-                
-                // Estatísticas dos dados atuais
-                console.log('📊 Estatísticas dos dados:');
-                console.log(`  - Registros consolidados: ${dadosConsolidados.length}`);
-                console.log(`  - Equipamentos únicos: ${new Set(dadosConsolidados.map(item => item.equipamento)).size}`);
-                console.log(`  - Com motorista: ${dadosConsolidados.filter(item => item.motorista !== 'Não identificado').length}`);
-                
-                updateValidationStatus('success', `Diagnóstico concluído com sucesso - Sistema operacional`);
-                showNotification('✅ Diagnóstico concluído - Sistema funcionando corretamente', 'success');
-                
-            } catch (error) {
-                console.error('❌ Erro no diagnóstico:', error);
-                updateValidationStatus('error', `Diagnóstico falhou: ${error.message}`);
-                showNotification('❌ Erro no diagnóstico: ' + error.message, 'error');
-            }
+        function atualizarRodape() {
+            const agora = new Date();
+            const timestamp = agora.toLocaleString('pt-BR');
+            document.getElementById('footerInfo').textContent = 
+                `Desenvolvido por Warlison Abreu | Última atualização: ${timestamp}`;
         }
 
         // Event listeners
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                filtrarTabela();
+        document.getElementById('searchInput').addEventListener('input', filtrarDados);
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                e.preventDefault();
+                carregarDados();
+            }
+            else if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+            else if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                exportarCSV();
             }
         });
 
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            if (e.target.value === '') {
-                dadosFiltrados = [];
-                exibirTabela();
-            }
-        });
-
-        /*********************************
-         * INICIALIZAÇÃO                 *
-         *********************************/
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚛 Iniciando Sistema Refinado - Controle de Equipamentos GrupoGPS');
-            
-            updateSyncStatus('loading', 'Inicializando sistema seguro...');
-            updateValidationStatus('pending', 'Preparando validações...');
-            updateLastSyncTime();
-            
-            // Inicialização com delay para melhor UX
-            setTimeout(() => {
-                carregarTodosOsArquivos();
-            }, 1000);
-            
-            // Auto-atualização a cada 5 minutos
-            setInterval(() => {
-                console.log('🔄 Auto-atualização programada executando...');
-                carregarTodosOsArquivos();
-            }, 5 * 60 * 1000);
-            
-            console.log('✅ Sistema inicializado com recursos de segurança aprimorados!');
-        });
+        // Carregar dados ao inicializar
+        document.addEventListener('DOMContentLoaded', carregarDados);
     </script>
 </body>
 </html>
